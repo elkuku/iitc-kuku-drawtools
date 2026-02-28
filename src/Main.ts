@@ -4,6 +4,7 @@ import * as Plugin from 'iitcpluginkit'
 import plugin from '../plugin.json'
 
 import { loadExternals } from './Externals'
+import { isMarker } from './Helper/LayerTypes'
 import { DrawOptions } from './DrawOptions'
 import { MergeControl } from './Helper/MergeControl'
 import { Storage } from './Helper/Storage'
@@ -105,7 +106,7 @@ class Main implements Plugin.Class {
             this.drawnItems.addLayer(layer)
             this.storage.save(this.drawnItems, this.drawOptions)
 
-            if (layer instanceof L.Marker) {
+            if (isMarker(layer)) {
                 registerMarkerForOMS(layer)
             }
 

@@ -1,5 +1,6 @@
 import { DrawItem } from '../DrawTypes'
 import { DrawOptions } from '../DrawOptions'
+import { isCircle, isPolygon, isPolyline, isMarker } from './LayerTypes'
 
 export class Storage {
     keyStorage = 'plugin-draw-tools-layer'
@@ -9,19 +10,15 @@ export class Storage {
 
         drawnItems.eachLayer((layer) => {
             // Cast to any where @types/leaflet 0.7.x doesn't declare .options on instances
-            if (layer instanceof L.GeodesicCircle || layer instanceof L.Circle) {
-                const circle = layer as L.Circle
-                data.push({ type: 'circle', latLng: circle.getLatLng(), radius: circle.getRadius(), color: (circle as any).options?.color as string | undefined })
-            } else if (layer instanceof L.GeodesicPolygon || layer instanceof L.Polygon) {
-                const polygon = layer
-                data.push({ type: 'polygon', latLngs: polygon.getLatLngs() as { lat: number; lng: number }[], color: (polygon as any).options?.color as string | undefined })
-            } else if (layer instanceof L.GeodesicPolyline || layer instanceof L.Polyline) {
-                const polyline = layer
-                data.push({ type: 'polyline', latLngs: polyline.getLatLngs() as { lat: number; lng: number }[], color: (polyline as any).options?.color as string | undefined })
-            } else if (layer instanceof L.Marker) {
-                const marker = layer
-                const icon = (marker as any).options?.icon as (L.DivIcon & { options: { color: string } }) | undefined
-                data.push({ type: 'marker', latLng: marker.getLatLng(), color: icon?.options?.color })
+            if (isCircle(layer)) {
+                data.push({ type: 'circle', latLng: layer.getLatLng(), radius: layer.getRadius(), color: (layer as any).options?.color as string | undefined })
+            } else if (isPolygon(layer)) {
+                data.push({ type: 'polygon', latLngs: layer.getLatLngs() as { lat: number; lng: number }[], color: (layer as any).options?.color as string | undefined })
+            } else if (isPolyline(layer)) {
+                data.push({ type: 'polyline', latLngs: layer.getLatLngs() as { lat: number; lng: number }[], color: (layer as any).options?.color as string | undefined })
+            } else if (isMarker(layer)) {
+                const icon = (layer as any).options?.icon as (L.DivIcon & { options: { color: string } }) | undefined
+                data.push({ type: 'marker', latLng: layer.getLatLng(), color: icon?.options?.color })
             } else {
                 console.warn('Unknown layer type when saving draw tools layer')
             }

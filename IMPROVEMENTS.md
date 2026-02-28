@@ -33,11 +33,14 @@ export type DrawItem =
     | { type: 'marker';   latLng: { lat: number; lng: number }; color?: string }
 ```
 
-### 3. Extract Repeated Layer `instanceof` Checking
+### 3. ✅ Extract Repeated Layer `instanceof` Checking — _implemented in …_
 
 The `instanceof` pattern for Circle / Polygon / Polyline / Marker appears in at least three
-places (`Storage.save`, `OptionsDialog.optCopy`, `SnapHelper`). A shared utility or visitor
-would eliminate the duplication.
+places (`Storage.save`, `OptionsDialog.optCopy`, `SnapHelper`). Extracted to four type
+guard functions in `src/Helper/LayerTypes.ts` (`isCircle`, `isPolygon`, `isPolyline`,
+`isMarker`). Each also handles the geodesic variant. TypeScript narrows the layer type
+inside each branch, removing the need for intermediate cast variables like
+`const circle = layer as L.Circle`.
 
 ### 4. `MergeControl` is Just a Boolean
 

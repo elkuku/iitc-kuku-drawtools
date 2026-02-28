@@ -1,4 +1,5 @@
 import { DrawOptions } from '../DrawOptions'
+import { isCircle, isPolygon, isPolyline, isMarker } from './LayerTypes'
 import { MergeControl } from './MergeControl'
 import { Storage } from './Storage'
 import { DrawControl } from './DrawControl'
@@ -98,19 +99,18 @@ export class OptionsDialog {
         const stockLinks: number[][] = []
 
         this.drawnItems.eachLayer((layer) => {
-            if (layer instanceof L.GeodesicCircle || layer instanceof L.Circle) {
+            if (isCircle(layer)) {
                 stockWarnings.noCircle = true
                 return
-            } else if (layer instanceof L.Marker) {
+            } else if (isMarker(layer)) {
                 stockWarnings.noMarker = true
                 return
-            } else if (!(layer instanceof L.GeodesicPolyline || layer instanceof L.Polyline ||
-                         layer instanceof L.GeodesicPolygon || layer instanceof L.Polygon)) {
+            } else if (!isPolyline(layer) && !isPolygon(layer)) {
                 stockWarnings.unknown = true
                 return
             }
 
-            if (layer instanceof L.GeodesicPolygon || layer instanceof L.Polygon) {
+            if (isPolygon(layer)) {
                 stockWarnings.polyAsLine = true
             }
 
@@ -118,7 +118,7 @@ export class OptionsDialog {
             for (let index = 0; index < latLngs.length - 1; index++) {
                 stockLinks.push([latLngs[index].lat, latLngs[index].lng, latLngs[index + 1].lat, latLngs[index + 1].lng])
             }
-            if (layer instanceof L.GeodesicPolygon || layer instanceof L.Polygon) {
+            if (isPolygon(layer)) {
                 stockLinks.push([latLngs.at(-1)!.lat, latLngs.at(-1)!.lng, latLngs[0].lat, latLngs[0].lng])
             }
         })
