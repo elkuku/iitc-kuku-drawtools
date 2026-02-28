@@ -1,13 +1,18 @@
 import { DrawOptions } from '../DrawOptions'
 import { SnapHelper } from './SnapHelper'
 
+// Minimal shape of the Leaflet.draw control (loaded at runtime via loadExternals)
+interface LeafletDrawControl extends L.IControl {
+    _toolbars: Record<string, L.Toolbar>;
+    _container: HTMLElement;
+    setDrawingOptions(options: Record<string, unknown>): void;
+}
+
 export class DrawControl {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private control!: any
+    private control!: LeafletDrawControl
 
     readonly create = (drawnItems: L.FeatureGroup<L.ILayer>, drawOptions: DrawOptions, snapHelper: SnapHelper): void => {
-        // L.Control.Draw is loaded at runtime via loadExternals (Leaflet.draw)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         this.control = new (L.Control as any).Draw({
             draw: {
                 rectangle: false,
@@ -35,14 +40,17 @@ export class DrawControl {
                     selectedPathOptions: drawOptions.editOptions,
                 },
             },
-        })
+        }) as LeafletDrawControl
 
         window.map.addControl(this.control)
 
         this.setAccessKeys()
 
-        for (const toolbarId in this.control._toolbars) {
+        // eslint-disable-next-line no-underscore-dangle
+        for (const toolbarId of Object.keys(this.control._toolbars)) {
+            // eslint-disable-next-line no-underscore-dangle
             if (this.control._toolbars[toolbarId] instanceof L.Toolbar) {
+                // eslint-disable-next-line no-underscore-dangle
                 this.control._toolbars[toolbarId].on('enable', () => {
                     setTimeout(this.setAccessKeys, 10)
                 })
@@ -74,9 +82,9 @@ export class DrawControl {
             'a', // cancel
         ]
 
+        // eslint-disable-next-line no-underscore-dangle
         const buttons = this.control._container.getElementsByTagName('a')
-        for (let index = 0; index < buttons.length; index++) {
-            const button = buttons[index]
+        for (const [index, button] of [...buttons].entries()) {
             let title = button.title
             const found = title.search(expr)
             if (found !== -1) title = title.slice(0, found)
@@ -85,8 +93,7 @@ export class DrawControl {
                 button.accessKey = ''
             } else if (accessKeys[index]) {
                 button.accessKey = accessKeys[index]
-                if (title === '') title = '[' + accessKeys[index] + ']'
-                else title += ' [' + accessKeys[index] + ']'
+                title = title === '' ? `[${accessKeys[index]}]` : `${title} [${accessKeys[index]}]`
             }
             button.title = title
         }

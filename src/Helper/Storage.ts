@@ -4,22 +4,22 @@ import { DrawOptions } from '../DrawOptions'
 export class Storage {
     keyStorage = 'plugin-draw-tools-layer'
 
-    readonly save = (drawnItems: L.FeatureGroup<L.ILayer>, drawOptions: DrawOptions): void => {
+    readonly save = (drawnItems: L.FeatureGroup<L.ILayer>, _drawOptions: DrawOptions): void => {
         const data: DrawItem[] = []
 
         drawnItems.eachLayer((layer) => {
             // Cast to any where @types/leaflet 0.7.x doesn't declare .options on instances
             if (layer instanceof L.GeodesicCircle || layer instanceof L.Circle) {
                 const circle = layer as L.Circle
-                data.push({ type: 'circle', latLng: circle.getLatLng(), radius: circle.getRadius(), color: (circle as any).options?.color })
+                data.push({ type: 'circle', latLng: circle.getLatLng(), radius: circle.getRadius(), color: (circle as any).options?.color as string | undefined })
             } else if (layer instanceof L.GeodesicPolygon || layer instanceof L.Polygon) {
-                const polygon = layer as L.Polygon
-                data.push({ type: 'polygon', latLngs: polygon.getLatLngs() as any, color: (polygon as any).options?.color })
+                const polygon = layer
+                data.push({ type: 'polygon', latLngs: polygon.getLatLngs() as { lat: number; lng: number }[], color: (polygon as any).options?.color as string | undefined })
             } else if (layer instanceof L.GeodesicPolyline || layer instanceof L.Polyline) {
-                const polyline = layer as L.Polyline
-                data.push({ type: 'polyline', latLngs: polyline.getLatLngs() as any, color: (polyline as any).options?.color })
+                const polyline = layer
+                data.push({ type: 'polyline', latLngs: polyline.getLatLngs() as { lat: number; lng: number }[], color: (polyline as any).options?.color as string | undefined })
             } else if (layer instanceof L.Marker) {
-                const marker = layer as L.Marker
+                const marker = layer
                 const icon = (marker as any).options?.icon as (L.DivIcon & { options: { color: string } }) | undefined
                 data.push({ type: 'marker', latLng: marker.getLatLng(), color: icon?.options?.color })
             } else {
@@ -44,7 +44,7 @@ export class Storage {
 
     readonly import = (data: DrawItem[], drawnItems: L.FeatureGroup<L.ILayer>, drawOptions: DrawOptions): void => {
         for (const item of data) {
-            let layer: L.ILayer | null = null
+            let layer: L.ILayer | undefined
             const extraOptions = item.color ? { color: item.color } : {}
 
             switch (item.type) {
@@ -66,7 +66,7 @@ export class Storage {
                     break
                 }
                 default:
-                    console.warn(`unknown layer type "${item.type}" when loading draw tools layer`)
+                    console.warn(`unknown layer type "${String(item.type)}" when loading draw tools layer`)
             }
 
             if (layer) {
@@ -97,7 +97,7 @@ export class Storage {
 
         for (const element of rawDraw) {
             if (element.type === 'polygon') {
-                const latLngs = element.latLngs as Array<{ lat: number; lng: number }>
+                const latLngs = element.latLngs as { lat: number; lng: number }[]
                 draw.push({
                     color: element.color,
                     type: 'polyline',

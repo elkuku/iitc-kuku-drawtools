@@ -143,7 +143,7 @@ class Main implements Plugin.Class {
         this.edf.init()
     }
 
-    readonly getLocationFilters = (): Array<(portal: unknown) => boolean> =>
+    readonly getLocationFilters = (): ((portal: unknown) => boolean)[] =>
         this.locationFilter.getLocationFilters(this.drawnItems)
 }
 

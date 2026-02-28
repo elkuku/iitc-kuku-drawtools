@@ -27,7 +27,7 @@ export class DrawOptions {
 
         this.polygonOptions = L.extend({}, this.lineOptions, {
             fill: true,
-            fillColor: null,
+            fillColor: undefined,
             fillOpacity: 0.2,
             dashArray: '',
             interactive: true,
@@ -53,7 +53,7 @@ export class DrawOptions {
     };
 
     readonly setFillOpacity = (filled: boolean): void => {
-        this.polygonOptions.fillOpacity = filled ? 0.2 : 0.0;
+        this.polygonOptions.fillOpacity = filled ? 0.2 : 0;
         this.polygonOptions.interactive = filled;
     };
 }

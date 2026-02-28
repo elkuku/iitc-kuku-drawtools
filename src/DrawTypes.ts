@@ -4,6 +4,6 @@ export interface DrawItem {
     type: DrawItemType;
     color?: string;
     latLng?: { lat: number; lng: number };
-    latLngs?: Array<{ lat: number; lng: number }> | Array<Array<{ lat: number; lng: number }>>;
+    latLngs?: { lat: number; lng: number }[] | { lat: number; lng: number }[][];
     radius?: number;
 }

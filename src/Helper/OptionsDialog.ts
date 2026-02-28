@@ -1,3 +1,4 @@
+import { DrawItem } from '../DrawTypes'
 import { DrawOptions } from '../DrawOptions'
 import { MergeControl } from './MergeControl'
 import { Storage } from './Storage'
@@ -88,7 +89,7 @@ export class OptionsDialog {
         if (this.storage.isEmpty()) return
 
         if (window.isApp && window.app.shareString) {
-            window.app.shareString(window.localStorage[this.storage.keyStorage])
+            window.app.shareString(window.localStorage[this.storage.keyStorage] as string)
             return
         }
 
@@ -97,22 +98,22 @@ export class OptionsDialog {
 
         this.drawnItems.eachLayer((layer) => {
             if (layer instanceof L.GeodesicCircle || layer instanceof L.Circle) {
-                stockWarnings['noCircle'] = true
+                stockWarnings.noCircle = true
                 return
             } else if (layer instanceof L.Marker) {
-                stockWarnings['noMarker'] = true
+                stockWarnings.noMarker = true
                 return
             } else if (!(layer instanceof L.GeodesicPolyline || layer instanceof L.Polyline ||
                          layer instanceof L.GeodesicPolygon || layer instanceof L.Polygon)) {
-                stockWarnings['unknown'] = true
+                stockWarnings.unknown = true
                 return
             }
 
             if (layer instanceof L.GeodesicPolygon || layer instanceof L.Polygon) {
-                stockWarnings['polyAsLine'] = true
+                stockWarnings.polyAsLine = true
             }
 
-            const latLngs = (layer as L.Polyline).getLatLngs() as L.LatLng[]
+            const latLngs = layer.getLatLngs()
             for (let index = 0; index < latLngs.length - 1; index++) {
                 stockLinks.push([latLngs[index].lat, latLngs[index].lng, latLngs[index + 1].lat, latLngs[index + 1].lng])
             }
@@ -121,15 +122,15 @@ export class OptionsDialog {
             }
         })
 
-        const stockUrl = makePermalink(null as unknown as L.LatLng, { includeMapView: true, fullURL: true }) +
+        const stockUrl = makePermalink(undefined as unknown as L.LatLng, { includeMapView: true, fullURL: true }) +
             '&pls=' + stockLinks.map((link) => link.join(',')).join('_')
 
         const stockWarnTexts: string[] = []
-        if (stockWarnings['polyAsLine']) stockWarnTexts.push('Note: polygons are exported as lines')
+        if (stockWarnings.polyAsLine) stockWarnTexts.push('Note: polygons are exported as lines')
         if (stockLinks.length > 40) stockWarnTexts.push(`Warning: Stock intel may not work with more than 40 line segments - there are ${stockLinks.length}`)
-        if (stockWarnings['noCircle']) stockWarnTexts.push('Warning: Circles cannot be exported to stock intel')
-        if (stockWarnings['noMarker']) stockWarnTexts.push('Warning: Markers cannot be exported to stock intel')
-        if (stockWarnings['unknown']) stockWarnTexts.push('Warning: UNKNOWN ITEM TYPE')
+        if (stockWarnings.noCircle) stockWarnTexts.push('Warning: Circles cannot be exported to stock intel')
+        if (stockWarnings.noMarker) stockWarnTexts.push('Warning: Markers cannot be exported to stock intel')
+        if (stockWarnings.unknown) stockWarnTexts.push('Warning: UNKNOWN ITEM TYPE')
 
         const $html = $('<div>')
         $html.append(
@@ -137,7 +138,7 @@ export class OptionsDialog {
             $('<p style="margin:0 0 6px;">').append(
                 $('<a>').text('Select all').on('click', () => { $html.find('textarea#copyNorm').trigger('select') })
             ).append(' and press CTRL+C to copy it.'),
-            $('<textarea id="copyNorm" readonly>').text(window.localStorage[this.storage.keyStorage]).on('click', function () { $(this).trigger('select') }),
+            $('<textarea id="copyNorm" readonly>').text(window.localStorage[this.storage.keyStorage] as string).on('click', function () { $(this).trigger('select') }),
             $('<hr/>'),
             $('<p style="margin:0 0 6px;">or export with polygons as lines (not filled):</p>'),
             $('<p style="margin:0 0 6px;">').append(
@@ -160,7 +161,7 @@ export class OptionsDialog {
 
     readonly optExport = (): void => {
         if (this.storage.isEmpty()) return
-        saveFile(window.localStorage[this.storage.keyStorage], 'IITC-drawn-items.json', 'application/json')
+        saveFile(window.localStorage[this.storage.keyStorage] as string, 'IITC-drawn-items.json', 'application/json')
     }
 
     readonly optPaste = (): void => {
@@ -228,7 +229,7 @@ export class OptionsDialog {
                 }
 
                 this.drawnItems.clearLayers()
-                this.storage.import(data as any, this.drawnItems, this.drawOptions)
+                this.storage.import(data as DrawItem[], this.drawnItems, this.drawOptions)
                 console.log(`DRAWTOOLS: ${this.mergeControl.status ? '' : 'reset and '}pasted drawn items`)
                 this.optAlert('Import Successful.')
             }
@@ -249,7 +250,7 @@ export class OptionsDialog {
                     this.drawnItems.clearLayers()
                     firstRun = false
                 }
-                this.storage.import(data as any, this.drawnItems, this.drawOptions)
+                this.storage.import(data as DrawItem[], this.drawnItems, this.drawOptions)
                 console.log(`DRAWTOOLS: ${this.mergeControl.status ? '' : 'reset and '}imported drawn items`)
                 this.optAlert('Import Successful.')
                 this.storage.save(this.drawnItems, this.drawOptions)

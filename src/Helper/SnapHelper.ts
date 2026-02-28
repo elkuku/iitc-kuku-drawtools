@@ -9,12 +9,12 @@ export class SnapHelper {
         $.each(window.portals, (_guid, portal) => {
             const ll = portal.getLatLng()
             const pp = window.map.latLngToContainerPoint(ll)
-            // portal.options uses the runtime type; PortalOptions lacks weight/radius in @types/leaflet 0.7.x
-            const opts = portal.options as any
-            const size = (opts.weight ?? 0) + (opts.radius ?? 0)
-            const dist = pp.distanceTo(containerPoint)
-            if (dist > size) return
-            candidates.push([dist, ll])
+            // portal.options lacks weight/radius in @types/leaflet 0.7.x; cast to access runtime values
+            const portalOptions = portal.options as any
+            const size = ((portalOptions.weight as number) ?? 0) + ((portalOptions.radius as number) ?? 0)
+            const distance = pp.distanceTo(containerPoint)
+            if (distance > size) return
+            candidates.push([distance, ll])
         })
 
         if (candidates.length === 0) return unsnappedLatLng
@@ -23,12 +23,13 @@ export class SnapHelper {
     }
 
     readonly snapToPortals = (drawnItems: L.FeatureGroup<L.ILayer>, storage: Storage, drawOptions: DrawOptions): void => {
-        if (!getDataZoomTileParameters().hasPortals) {
+        if (!(getDataZoomTileParameters() as any).hasPortals) {
             if (!confirm('Not all portals are visible on the map. Snap to portals may move valid points to the wrong place. Continue?')) {
                 return
             }
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         if (window.mapDataRequest.getStatus().short !== 'done') {
             if (!confirm('Map data has not completely loaded, so some portals may be missing. Do you want to continue?')) {
                 return
@@ -45,21 +46,21 @@ export class SnapHelper {
             }
         })
 
-        if (!Object.keys(visiblePortals).length) {
+        if (Object.keys(visiblePortals).length === 0) {
             alert('Error: No portals visible in this view - nothing to snap points to!')
             return
         }
 
         const findClosest = (latlng: L.LatLng): L.LatLng | undefined => {
             const testPoint = window.map.project(latlng)
-            let minDistSquared = Infinity
+            let minSquaredDistance = Infinity
             let minGuid: string | undefined
 
             for (const guid in visiblePortals) {
                 const diff = visiblePortals[guid].subtract(testPoint)
-                const distSquared = diff.x * diff.x + diff.y * diff.y
-                if (minDistSquared > distSquared) {
-                    minDistSquared = distSquared
+                const squaredDistance = diff.x * diff.x + diff.y * diff.y
+                if (minSquaredDistance > squaredDistance) {
+                    minSquaredDistance = squaredDistance
                     minGuid = guid
                 }
             }
@@ -89,8 +90,8 @@ export class SnapHelper {
                     }
                 }
             } else if (asAny.getLatLngs) {
-                const polyline = layer as L.Polyline
-                const lls = polyline.getLatLngs() as L.LatLng[]
+                const polyline = asAny as L.Polyline
+                const lls = polyline.getLatLngs()
                 let layerChanged = false
                 lls.forEach((ll, index) => {
                     if (visibleBounds.contains(ll)) {

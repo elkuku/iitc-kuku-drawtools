@@ -1,6 +1,6 @@
 // External libraries bundled by webpack.
 // leaflet-draw and spectrum-colorpicker are managed via yarn (package.json).
-// iitc-draw-* modules are resolved to the IITC repo via webpack.config.cjs aliases.
+// iitc-draw-* modules are resolved to external/ via webpack.config.cjs aliases.
 
 // https://github.com/Leaflet/Leaflet.draw
 import 'leaflet-draw'
@@ -23,14 +23,19 @@ export const loadExternals = (): void => {
     L.Draw.Circle.prototype.options.shapeOptions.interactive = true
 
     // https://github.com/Leaflet/Leaflet.draw/issues/789
-    L.Draw.Polyline.prototype._onTouch_original = L.Draw.Polyline.prototype._onTouch
-    L.Draw.Polyline.prototype._onTouch = L.Util.falseFn as Function
+    const polylineProto = L.Draw.Polyline.prototype as any
+    // eslint-disable-next-line no-underscore-dangle
+    polylineProto._onTouch_original = polylineProto._onTouch
+    // eslint-disable-next-line no-underscore-dangle
+    polylineProto._onTouch = L.Util.falseFn
 
     // Workaround for https://github.com/Leaflet/Leaflet.draw/issues/923
     // addHandler and TouchExtend are Leaflet.draw extensions not in @types/leaflet 0.7.x
-    ;(window.map as any).addHandler('touchExtend', (L.Map as any).TouchExtend)
+    const mapAny = window.map as any
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    mapAny.addHandler('touchExtend', (L.Map as any).TouchExtend)
 
     // Disable tap handler (conflicts with leaflet.draw https://github.com/Leaflet/Leaflet/issues/6977)
-    const mapAny = window.map as any
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     mapAny.tap = mapAny.tap ? mapAny.tap.disable() : false
 }

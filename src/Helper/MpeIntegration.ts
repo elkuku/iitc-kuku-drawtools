@@ -4,10 +4,10 @@ import { DrawOptions } from '../DrawOptions'
 export class MpeIntegration {
     readonly init = (storage: Storage, drawOptions: DrawOptions, drawnItems: L.FeatureGroup<L.ILayer>): void => {
         // window.plugin namespace is TypeScript-only; mpe/crossLinks/destroyedLinks are 3rd-party plugins
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const wPlugin = window.plugin as any
         if (!wPlugin.mpe) return
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         wPlugin.mpe.setMultiProjects({
             namespace: 'drawTools',
             title: 'Draw Tools Layer',
@@ -23,7 +23,9 @@ export class MpeIntegration {
                 console.log('DRAWTOOLS: reset all drawn items (func_post)')
 
                 if (wPlugin.crossLinks) {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                     wPlugin.crossLinks.checkAllLinks()
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                     wPlugin.destroyedLinks?.cross.removeCrossAll()
                 }
             },
