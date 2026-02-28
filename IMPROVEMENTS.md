@@ -6,7 +6,7 @@ Identified during analysis on 2026-02-28. Items marked ✅ are implemented.
 
 ## High Priority
 
-### 1. XSS in `OptionsDialog.optAlert()`
+### 1. ✅ XSS in `OptionsDialog.optAlert()`
 
 `message` is passed into a template literal and injected via jQuery's `prepend()`. Though
 currently only called with internal string literals, it is a fragile pattern.

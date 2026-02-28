@@ -83,7 +83,7 @@ export class OptionsDialog {
 
     readonly optAlert = (message: string): void => {
         $('.ui-dialog-drawtoolsSet .ui-dialog-buttonset')
-            .prepend(`<p class="drawtools-alert" style="float:left;margin-top:4px;">${message}</p>`)
+            .prepend($('<p class="drawtools-alert" style="float:left;margin-top:4px;">').html(message))
         $('.drawtools-alert').delay(2500).fadeOut()
     }
 
