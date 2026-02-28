@@ -11,6 +11,7 @@ import { SnapHelper } from './Helper/SnapHelper'
 import { DrawControl } from './Helper/DrawControl'
 import { EmptyDrawnFields } from './Helper/EmptyDrawnFields'
 import { OptionsDialog } from './Helper/OptionsDialog'
+import { ImportExport } from './Helper/ImportExport'
 import { LocationFilter } from './Helper/LocationFilter'
 import { MpeIntegration } from './Helper/MpeIntegration'
 
@@ -28,6 +29,7 @@ class Main implements Plugin.Class {
     private drawControl!: DrawControl
     private edf!: EmptyDrawnFields
     private optionsDialog!: OptionsDialog
+    private importExport!: ImportExport
     private locationFilter!: LocationFilter
     private mpeIntegration!: MpeIntegration
 
@@ -50,6 +52,12 @@ class Main implements Plugin.Class {
         this.edf = new EmptyDrawnFields()
         this.locationFilter = new LocationFilter()
         this.mpeIntegration = new MpeIntegration()
+        this.importExport = new ImportExport(
+            this.drawnItems,
+            this.drawOptions,
+            this.storage,
+            this.mergeControl,
+        )
 
         this.optionsDialog = new OptionsDialog(
             this.drawnItems,
@@ -59,6 +67,7 @@ class Main implements Plugin.Class {
             this.drawControl,
             this.snapHelper,
             this.edf,
+            this.importExport,
         )
 
         this.boot()

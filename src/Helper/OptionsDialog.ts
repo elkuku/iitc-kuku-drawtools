@@ -1,10 +1,10 @@
-import { DrawItem } from '../DrawTypes'
 import { DrawOptions } from '../DrawOptions'
 import { MergeControl } from './MergeControl'
 import { Storage } from './Storage'
 import { DrawControl } from './DrawControl'
 import { SnapHelper } from './SnapHelper'
 import { EmptyDrawnFields } from './EmptyDrawnFields'
+import { ImportExport } from './ImportExport'
 
 export class OptionsDialog {
     constructor(
@@ -15,6 +15,7 @@ export class OptionsDialog {
         private readonly drawControl: DrawControl,
         private readonly snapHelper: SnapHelper,
         private readonly edf: EmptyDrawnFields,
+        private readonly importExport: ImportExport,
     ) {}
 
     readonly show = (): void => {
@@ -177,83 +178,27 @@ export class OptionsDialog {
                 const value = $('#drawtoolsimport').val()
                 const text = typeof value === 'string' ? value.trim() : ''
                 if (text) {
-                    this.promptImport(text)
+                    try {
+                        this.importExport.promptImport(text)
+                        this.optAlert('Import Successful.')
+                    } catch (error) {
+                        console.warn('DRAWTOOLS: failed to import data: ' + String(error))
+                        this.optAlert('<span style="color: #f88">Import failed</span>')
+                    }
                 }
             },
         })
-    }
-
-    readonly promptImport = (promptAction: string): void => {
-        try {
-            const matchIntel = /^(https:\/\/)?intel\.ingress\.com\/.*[?&]pls=/.exec(promptAction)
-            if (matchIntel) {
-                const items = promptAction.split(/[?&]/)
-                const foundAt = items.findIndex((item) => item.startsWith('pls='))
-                if (foundAt === -1) throw new Error('No drawn items found in intel URL')
-
-                const newLines: L.ILayer[] = []
-                const linesStr = items[foundAt].slice(4).split('_')
-                for (const lineStr of linesStr) {
-                    const floats = lineStr.split(',').map(Number)
-                    if (floats.length !== 4) throw new Error('URL item not a set of four floats')
-                    if (floats.some((num) => isNaN(num))) throw new Error('URL item had invalid number')
-                    newLines.push(L.geodesicPolyline([[floats[0], floats[1]], [floats[2], floats[3]]] as unknown as L.LatLng[], this.drawOptions.lineOptions))
-                }
-
-                if (!this.mergeControl.status) {
-                    this.drawnItems.clearLayers()
-                }
-                for (const line of newLines) {
-                    this.drawnItems.addLayer(line)
-                }
-                window.runHooks('pluginDrawTools', { event: 'import' })
-                console.log(`DRAWTOOLS: ${this.mergeControl.status ? '' : 'reset and '}pasted drawn items from stock URL`)
-                this.optAlert('Import Successful.')
-            } else {
-                let mergedAction = promptAction
-                if (this.mergeControl.status) {
-                    const existing = window.localStorage[this.storage.keyStorage] as string | undefined
-                    if (existing && existing.length > 4) {
-                        mergedAction = existing.slice(0, -1) + ',' + promptAction.slice(1)
-                    }
-                }
-
-                let data: unknown
-                try {
-                    data = JSON.parse(mergedAction)
-                } catch {
-                    let mutated = mergedAction
-                    if (!mutated.startsWith('[{')) mutated = mutated.slice(mutated.indexOf('[{'))
-                    if (!mutated.endsWith('}]')) mutated = mutated.slice(0, mutated.lastIndexOf('}]') + 2)
-                    data = JSON.parse(mutated)
-                }
-
-                this.drawnItems.clearLayers()
-                this.storage.import(data as DrawItem[], this.drawnItems, this.drawOptions)
-                console.log(`DRAWTOOLS: ${this.mergeControl.status ? '' : 'reset and '}pasted drawn items`)
-                this.optAlert('Import Successful.')
-            }
-
-            this.storage.save(this.drawnItems, this.drawOptions)
-        } catch (error) {
-            console.warn('DRAWTOOLS: failed to import data: ' + String(error))
-            this.optAlert('<span style="color: #f88">Import failed</span>')
-        }
     }
 
     readonly optImport = (): void => {
         let firstRun = true
         L.FileListLoader.loadFiles({ accept: 'application/json', multiple: true }).on('load', (event: unknown) => {
             try {
-                const data = JSON.parse((event as any).reader.result as string) as unknown[]
-                if (firstRun && !this.mergeControl.status) {
-                    this.drawnItems.clearLayers()
-                    firstRun = false
-                }
-                this.storage.import(data as DrawItem[], this.drawnItems, this.drawOptions)
+                const rawData = JSON.parse((event as any).reader.result as string) as unknown[]
+                this.importExport.importData(rawData, firstRun && !this.mergeControl.status)
+                firstRun = false
                 console.log(`DRAWTOOLS: ${this.mergeControl.status ? '' : 'reset and '}imported drawn items`)
                 this.optAlert('Import Successful.')
-                this.storage.save(this.drawnItems, this.drawOptions)
             } catch (error) {
                 console.warn('DRAWTOOLS: failed to import data: ' + String(error))
                 this.optAlert('<span style="color: #f88">Import failed</span>')
