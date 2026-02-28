@@ -1,5 +1,10 @@
+const DEFAULT_COLOR = '#a24ac3'
+const DRAW_WEIGHT = 4
+const DRAW_OPACITY = 0.5
+const DRAW_FILL_OPACITY = 0.2
+
 export class DrawOptions {
-    currentColor = '#a24ac3';
+    currentColor = DEFAULT_COLOR;
     currentMarker!: L.DivIcon;
     lineOptions!: L.PolylineOptions;
     polygonOptions!: L.PolylineOptions;
@@ -19,8 +24,8 @@ export class DrawOptions {
         this.lineOptions = {
             stroke: true,
             color: this.currentColor,
-            weight: 4,
-            opacity: 0.5,
+            weight: DRAW_WEIGHT,
+            opacity: DRAW_OPACITY,
             fill: false,
             interactive: true,
         };
@@ -28,7 +33,7 @@ export class DrawOptions {
         this.polygonOptions = L.extend({}, this.lineOptions, {
             fill: true,
             fillColor: undefined,
-            fillOpacity: 0.2,
+            fillOpacity: DRAW_FILL_OPACITY,
             dashArray: '',
             interactive: true,
         }) as L.PolylineOptions;
@@ -53,7 +58,7 @@ export class DrawOptions {
     };
 
     readonly setFillOpacity = (filled: boolean): void => {
-        this.polygonOptions.fillOpacity = filled ? 0.2 : 0;
+        this.polygonOptions.fillOpacity = filled ? DRAW_FILL_OPACITY : 0;
         this.polygonOptions.interactive = filled;
     };
 }

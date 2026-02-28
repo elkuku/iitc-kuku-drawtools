@@ -84,7 +84,7 @@ Removed the parameter entirely. The cascade: `SnapHelper.snapToPortals()` only p
 which in turn drops the argument from the call site in `OptionsDialog`. All six `save()`
 call sites updated.
 
-### 8. Add Named Constants for Magic Numbers
+### 8. ✅ Add Named Constants for Magic Numbers
 
 ```typescript
 // DrawOptions.ts
