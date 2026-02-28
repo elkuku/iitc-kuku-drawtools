@@ -93,13 +93,17 @@ const DRAW_OPACITY = 0.5
 const DRAW_FILL_OPACITY = 0.2
 ```
 
-### 9. Duplicate `'a'` Access Key in `DrawControl.setAccessKeys()`
+### 9. ✅ Duplicate `'a'` Access Key in `DrawControl.setAccessKeys()`
 
 ```typescript
 // src/Helper/DrawControl.ts
 const accessKeys = ['l', 'p', 'o', 'm', 'a', 'e', 'd', 's', 'a']
 //                                          ^^^                ^^^ duplicate — second cancel
 ```
+
+Removed `setAccessKeys()` entirely along with its two call sites in `create()` (initial
+call + the toolbar `enable` listener that re-ran it via `setTimeout`). Also removed the
+now-unused `_toolbars` and `_container` members from the `LeafletDrawControl` interface.
 
 ---
 
