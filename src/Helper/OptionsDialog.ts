@@ -1,6 +1,5 @@
 import { DrawOptions } from '../DrawOptions'
 import { isCircle, isPolygon, isPolyline, isMarker } from './LayerTypes'
-import { MergeControl } from './MergeControl'
 import { Storage } from './Storage'
 import { DrawControl } from './DrawControl'
 import { SnapHelper } from './SnapHelper'
@@ -8,10 +7,11 @@ import { EmptyDrawnFields } from './EmptyDrawnFields'
 import { ImportExport } from './ImportExport'
 
 export class OptionsDialog {
+    private mergeMode = true
+
     constructor(
         private readonly drawnItems: L.FeatureGroup<L.ILayer>,
         private readonly drawOptions: DrawOptions,
-        private readonly mergeControl: MergeControl,
         private readonly storage: Storage,
         private readonly drawControl: DrawControl,
         private readonly snapHelper: SnapHelper,
@@ -38,8 +38,8 @@ export class OptionsDialog {
 
         const $mergeLabel = $('<label id="MergeToggle">')
         $('<input>').attr({ type: 'checkbox', name: 'merge' })
-            .prop('checked', !this.mergeControl.status)
-            .on('change', () => { this.mergeControl.toggle() })
+            .prop('checked', !this.mergeMode)
+            .on('change', () => { this.mergeMode = !this.mergeMode })
             .appendTo($mergeLabel)
         $mergeLabel.append('Reset draws before paste or import')
         $('<center>').append($mergeLabel).appendTo($setbox)
@@ -179,7 +179,7 @@ export class OptionsDialog {
                 const text = typeof value === 'string' ? value.trim() : ''
                 if (text) {
                     try {
-                        this.importExport.promptImport(text)
+                        this.importExport.promptImport(text, this.mergeMode)
                         this.optAlert('Import Successful.')
                     } catch (error) {
                         console.warn('DRAWTOOLS: failed to import data: ' + String(error))
@@ -195,9 +195,9 @@ export class OptionsDialog {
         L.FileListLoader.loadFiles({ accept: 'application/json', multiple: true }).on('load', (event: unknown) => {
             try {
                 const rawData = JSON.parse((event as any).reader.result as string) as unknown[]
-                this.importExport.importData(rawData, firstRun && !this.mergeControl.status)
+                this.importExport.importData(rawData, firstRun && !this.mergeMode)
                 firstRun = false
-                console.log(`DRAWTOOLS: ${this.mergeControl.status ? '' : 'reset and '}imported drawn items`)
+                console.log(`DRAWTOOLS: ${this.mergeMode ? '' : 'reset and '}imported drawn items`)
                 this.optAlert('Import Successful.')
             } catch (error) {
                 console.warn('DRAWTOOLS: failed to import data: ' + String(error))

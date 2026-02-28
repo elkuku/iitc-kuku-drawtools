@@ -1,6 +1,5 @@
 import { DrawItem } from '../DrawTypes'
 import { DrawOptions } from '../DrawOptions'
-import { MergeControl } from './MergeControl'
 import { Storage } from './Storage'
 
 export class ImportExport {
@@ -8,14 +7,14 @@ export class ImportExport {
         private readonly drawnItems: L.FeatureGroup<L.ILayer>,
         private readonly drawOptions: DrawOptions,
         private readonly storage: Storage,
-        private readonly mergeControl: MergeControl,
     ) {}
 
     /**
      * Parse and import a pasted string — either a stock intel URL or JSON draw-tools data.
+     * Pass merge=true to append to existing layers; false clears first.
      * Throws on parse/import failure; the caller is responsible for user-facing error handling.
      */
-    readonly promptImport = (promptAction: string): void => {
+    readonly promptImport = (promptAction: string, merge: boolean): void => {
         const matchIntel = /^(https:\/\/)?intel\.ingress\.com\/.*[?&]pls=/.exec(promptAction)
         if (matchIntel) {
             const items = promptAction.split(/[?&]/)
@@ -31,17 +30,17 @@ export class ImportExport {
                 newLines.push(L.geodesicPolyline([[floats[0], floats[1]], [floats[2], floats[3]]] as unknown as L.LatLng[], this.drawOptions.lineOptions))
             }
 
-            if (!this.mergeControl.status) {
+            if (!merge) {
                 this.drawnItems.clearLayers()
             }
             for (const line of newLines) {
                 this.drawnItems.addLayer(line)
             }
             window.runHooks('pluginDrawTools', { event: 'import' })
-            console.log(`DRAWTOOLS: ${this.mergeControl.status ? '' : 'reset and '}pasted drawn items from stock URL`)
+            console.log(`DRAWTOOLS: ${merge ? '' : 'reset and '}pasted drawn items from stock URL`)
         } else {
             let mergedAction = promptAction
-            if (this.mergeControl.status) {
+            if (merge) {
                 const existing = window.localStorage[this.storage.keyStorage] as string | undefined
                 if (existing && existing.length > 4) {
                     mergedAction = existing.slice(0, -1) + ',' + promptAction.slice(1)
@@ -60,7 +59,7 @@ export class ImportExport {
 
             this.drawnItems.clearLayers()
             this.storage.import(data as DrawItem[], this.drawnItems, this.drawOptions)
-            console.log(`DRAWTOOLS: ${this.mergeControl.status ? '' : 'reset and '}pasted drawn items`)
+            console.log(`DRAWTOOLS: ${merge ? '' : 'reset and '}pasted drawn items`)
         }
 
         this.storage.save(this.drawnItems, this.drawOptions)

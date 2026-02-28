@@ -42,11 +42,12 @@ guard functions in `src/Helper/LayerTypes.ts` (`isCircle`, `isPolygon`, `isPolyl
 inside each branch, removing the need for intermediate cast variables like
 `const circle = layer as L.Circle`.
 
-### 4. `MergeControl` is Just a Boolean
+### 4. ✅ `MergeControl` is Just a Boolean — _implemented in …_
 
-`src/Helper/MergeControl.ts` (8 lines) is a class wrapping a single `boolean` with a
-`toggle()` method. It could be inlined into `OptionsDialog` or `Main` as a plain boolean
-field.
+`src/Helper/MergeControl.ts` (8 lines) was a class wrapping a single `boolean` with a
+`toggle()` method. Replaced by a `private mergeMode = true` field on `OptionsDialog`
+(where the toggle UI lives). `ImportExport.promptImport` now receives `merge: boolean`
+as a parameter instead of holding a `MergeControl` reference. `MergeControl.ts` deleted.
 
 ### 5. ✅ Split `OptionsDialog` — UI vs. Business Logic — _implemented in …_
 

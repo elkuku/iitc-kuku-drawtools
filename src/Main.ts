@@ -6,7 +6,6 @@ import plugin from '../plugin.json'
 import { loadExternals } from './Externals'
 import { isMarker } from './Helper/LayerTypes'
 import { DrawOptions } from './DrawOptions'
-import { MergeControl } from './Helper/MergeControl'
 import { Storage } from './Helper/Storage'
 import { SnapHelper } from './Helper/SnapHelper'
 import { DrawControl } from './Helper/DrawControl'
@@ -24,7 +23,6 @@ class Main implements Plugin.Class {
     drawnItems!: L.FeatureGroup<L.ILayer>
 
     private drawOptions!: DrawOptions
-    private mergeControl!: MergeControl
     private storage!: Storage
     private snapHelper!: SnapHelper
     private drawControl!: DrawControl
@@ -46,7 +44,6 @@ class Main implements Plugin.Class {
         this.drawOptions.init()
 
         this.drawnItems = new L.FeatureGroup<L.ILayer>()
-        this.mergeControl = new MergeControl()
         this.storage = new Storage()
         this.snapHelper = new SnapHelper()
         this.drawControl = new DrawControl()
@@ -57,13 +54,11 @@ class Main implements Plugin.Class {
             this.drawnItems,
             this.drawOptions,
             this.storage,
-            this.mergeControl,
         )
 
         this.optionsDialog = new OptionsDialog(
             this.drawnItems,
             this.drawOptions,
-            this.mergeControl,
             this.storage,
             this.drawControl,
             this.snapHelper,
