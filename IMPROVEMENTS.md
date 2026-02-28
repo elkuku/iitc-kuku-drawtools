@@ -61,11 +61,17 @@ decide how to surface errors to the user.
 
 ## Medium Priority
 
-### 6. `getLatLngs()` Breaks for Polygons with Holes
+### 6. ✅ `getLatLngs()` Breaks for Polygons with Holes
 
 `Storage.save` casts `polygon.getLatLngs()` to a flat `LatLng[]`. For polygons with holes
 the return value is `LatLng[][]`. Such shapes would round-trip incorrectly (outer ring saved
 only, holes lost).
+
+Added `toPolygonRings()` helper in `LayerTypes.ts` that normalises `LatLng[] | LatLng[][]`
+to always `LatLng[][]`. Updated `DrawItem.polygon.latLngs` to a `[] | [][]` union for
+backward-compat with existing stored data. `Storage.save()` now always writes `[][]`; `import()`
+normalises on load; `getDrawAsLines()` uses the outer ring; `OptionsDialog.optCopy()` iterates
+all rings (so hole boundaries also appear in the intel URL export).
 
 ### 7. Unused `_drawOptions` Parameter in `Storage.save()`
 

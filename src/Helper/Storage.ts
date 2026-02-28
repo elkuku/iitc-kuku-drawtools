@@ -1,6 +1,6 @@
 import { DrawItem } from '../DrawTypes'
 import { DrawOptions } from '../DrawOptions'
-import { isCircle, isPolygon, isPolyline, isMarker } from './LayerTypes'
+import { isCircle, isPolygon, isPolyline, isMarker, toPolygonRings } from './LayerTypes'
 
 export class Storage {
     keyStorage = 'plugin-draw-tools-layer'
@@ -13,7 +13,8 @@ export class Storage {
             if (isCircle(layer)) {
                 data.push({ type: 'circle', latLng: layer.getLatLng(), radius: layer.getRadius(), color: (layer as any).options?.color as string | undefined })
             } else if (isPolygon(layer)) {
-                data.push({ type: 'polygon', latLngs: layer.getLatLngs() as { lat: number; lng: number }[], color: (layer as any).options?.color as string | undefined })
+                const rawLatLngs = layer.getLatLngs() as { lat: number; lng: number }[] | { lat: number; lng: number }[][]
+                data.push({ type: 'polygon', latLngs: toPolygonRings(rawLatLngs), color: (layer as any).options?.color as string | undefined })
             } else if (isPolyline(layer)) {
                 data.push({ type: 'polyline', latLngs: layer.getLatLngs() as { lat: number; lng: number }[], color: (layer as any).options?.color as string | undefined })
             } else if (isMarker(layer)) {
@@ -49,7 +50,7 @@ export class Storage {
                     layer = L.geodesicPolyline(item.latLngs as L.LatLng[], L.extend({}, drawOptions.lineOptions, extraOptions))
                     break
                 case 'polygon':
-                    layer = L.geodesicPolygon(item.latLngs as L.LatLng[], L.extend({}, drawOptions.polygonOptions, extraOptions))
+                    layer = L.geodesicPolygon(toPolygonRings(item.latLngs) as unknown as L.LatLng[], L.extend({}, drawOptions.polygonOptions, extraOptions))
                     break
                 case 'circle':
                     layer = L.geodesicCircle(item.latLng as L.LatLng, item.radius, L.extend({}, drawOptions.polygonOptions, extraOptions))
@@ -94,11 +95,16 @@ export class Storage {
 
         for (const element of rawDraw) {
             if (element.type === 'polygon') {
-                draw.push({
-                    color: element.color,
-                    type: 'polyline',
-                    latLngs: [...element.latLngs, element.latLngs[0]],
-                })
+                const rings = toPolygonRings(element.latLngs)
+                if (rings.length === 0) continue
+                const outerRing = rings[0]
+                if (outerRing.length > 0) {
+                    draw.push({
+                        color: element.color,
+                        type: 'polyline',
+                        latLngs: [...outerRing, outerRing[0]],
+                    })
+                }
             } else {
                 draw.push(element)
             }

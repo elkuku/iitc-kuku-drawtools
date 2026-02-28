@@ -1,5 +1,5 @@
 import { DrawOptions } from '../DrawOptions'
-import { isCircle, isPolygon, isPolyline, isMarker } from './LayerTypes'
+import { isCircle, isPolygon, isPolyline, isMarker, toPolygonRings } from './LayerTypes'
 import { Storage } from './Storage'
 import { DrawControl } from './DrawControl'
 import { SnapHelper } from './SnapHelper'
@@ -101,25 +101,27 @@ export class OptionsDialog {
         this.drawnItems.eachLayer((layer) => {
             if (isCircle(layer)) {
                 stockWarnings.noCircle = true
-                return
             } else if (isMarker(layer)) {
                 stockWarnings.noMarker = true
-                return
-            } else if (!isPolyline(layer) && !isPolygon(layer)) {
-                stockWarnings.unknown = true
-                return
-            }
-
-            if (isPolygon(layer)) {
+            } else if (isPolygon(layer)) {
                 stockWarnings.polyAsLine = true
-            }
-
-            const latLngs = layer.getLatLngs()
-            for (let index = 0; index < latLngs.length - 1; index++) {
-                stockLinks.push([latLngs[index].lat, latLngs[index].lng, latLngs[index + 1].lat, latLngs[index + 1].lng])
-            }
-            if (isPolygon(layer)) {
-                stockLinks.push([latLngs.at(-1)!.lat, latLngs.at(-1)!.lng, latLngs[0].lat, latLngs[0].lng])
+                const rawLatLngs = layer.getLatLngs() as { lat: number; lng: number }[] | { lat: number; lng: number }[][]
+                const rings = toPolygonRings(rawLatLngs)
+                for (const ring of rings) {
+                    for (let index = 0; index < ring.length - 1; index++) {
+                        stockLinks.push([ring[index].lat, ring[index].lng, ring[index + 1].lat, ring[index + 1].lng])
+                    }
+                    if (ring.length > 0) {
+                        stockLinks.push([ring.at(-1)!.lat, ring.at(-1)!.lng, ring[0].lat, ring[0].lng])
+                    }
+                }
+            } else if (isPolyline(layer)) {
+                const latLngs = layer.getLatLngs() as { lat: number; lng: number }[]
+                for (let index = 0; index < latLngs.length - 1; index++) {
+                    stockLinks.push([latLngs[index].lat, latLngs[index].lng, latLngs[index + 1].lat, latLngs[index + 1].lng])
+                }
+            } else {
+                stockWarnings.unknown = true
             }
         })
 
