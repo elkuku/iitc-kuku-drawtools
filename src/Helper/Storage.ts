@@ -55,7 +55,7 @@ export class Storage {
                     layer = L.geodesicPolygon(item.latLngs as L.LatLng[], L.extend({}, drawOptions.polygonOptions, extraOptions))
                     break
                 case 'circle':
-                    layer = L.geodesicCircle(item.latLng as L.LatLng, item.radius!, L.extend({}, drawOptions.polygonOptions, extraOptions))
+                    layer = L.geodesicCircle(item.latLng as L.LatLng, item.radius, L.extend({}, drawOptions.polygonOptions, extraOptions))
                     break
                 case 'marker': {
                     const markerOptions = L.extend({}, drawOptions.markerOptions,
@@ -66,7 +66,7 @@ export class Storage {
                     break
                 }
                 default:
-                    console.warn(`unknown layer type "${String(item.type)}" when loading draw tools layer`)
+                    console.warn(`unknown layer type "${String((item as Record<string, unknown>).type)}" when loading draw tools layer`)
             }
 
             if (layer) {
@@ -97,11 +97,10 @@ export class Storage {
 
         for (const element of rawDraw) {
             if (element.type === 'polygon') {
-                const latLngs = element.latLngs as { lat: number; lng: number }[]
                 draw.push({
                     color: element.color,
                     type: 'polyline',
-                    latLngs: [...latLngs, latLngs[0]],
+                    latLngs: [...element.latLngs, element.latLngs[0]],
                 })
             } else {
                 draw.push(element)
