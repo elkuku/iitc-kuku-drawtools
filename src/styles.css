@@ -1,0 +1,16 @@
+.drawtoolsSetbox > a {
+    display: block;
+    color: #ffce00;
+    border: 1px solid #ffce00;
+    padding: 3px 0;
+    margin: 10px auto;
+    width: 80%;
+    text-align: center;
+    background: rgba(8, 48, 78, .9);
+}
+
+.ui-dialog-drawtoolsSet-copy textarea {
+    width: 96%;
+    height: 150px;
+    resize: vertical;
+}

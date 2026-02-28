@@ -1,6 +1,8 @@
 {
   "dependencies": {
-    "iitcpluginkit": "^1.9.6"
+    "iitcpluginkit": "^1.9.6",
+    "leaflet-draw": "^1.0.4",
+    "spectrum-colorpicker": "^1.8.1"
   },
   "license": "Unlicense",
   "type": "module",

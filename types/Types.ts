@@ -4,10 +4,13 @@ export interface HelperHandlebars {
     registerHelper: (name: Handlebars.HelperDeclareSpec) => void
 }
 
+// Extend this interface in other .d.ts files to add plugin namespaces
+interface WindowPlugin {
+    HelperHandlebars?: HelperHandlebars
+}
+
 declare global {
     interface Window {
-        plugin: {
-            HelperHandlebars: HelperHandlebars
-        }
+        plugin: WindowPlugin
     }
 }

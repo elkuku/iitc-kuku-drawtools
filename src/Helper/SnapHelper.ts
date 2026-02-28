@@ -1,0 +1,119 @@
+import { Storage } from './Storage'
+import { DrawOptions } from '../DrawOptions'
+
+export class SnapHelper {
+    readonly getSnapLatLng = (unsnappedLatLng: L.LatLng): L.LatLng => {
+        const containerPoint = window.map.latLngToContainerPoint(unsnappedLatLng)
+        const candidates: [number, L.LatLng][] = []
+
+        $.each(window.portals, (_guid, portal) => {
+            const ll = portal.getLatLng()
+            const pp = window.map.latLngToContainerPoint(ll)
+            // portal.options uses the runtime type; PortalOptions lacks weight/radius in @types/leaflet 0.7.x
+            const opts = portal.options as any
+            const size = (opts.weight ?? 0) + (opts.radius ?? 0)
+            const dist = pp.distanceTo(containerPoint)
+            if (dist > size) return
+            candidates.push([dist, ll])
+        })
+
+        if (candidates.length === 0) return unsnappedLatLng
+        candidates.sort((a, b) => a[0] - b[0])
+        return new L.LatLng(candidates[0][1].lat, candidates[0][1].lng)
+    }
+
+    readonly snapToPortals = (drawnItems: L.FeatureGroup<L.ILayer>, storage: Storage, drawOptions: DrawOptions): void => {
+        if (!getDataZoomTileParameters().hasPortals) {
+            if (!confirm('Not all portals are visible on the map. Snap to portals may move valid points to the wrong place. Continue?')) {
+                return
+            }
+        }
+
+        if (window.mapDataRequest.getStatus().short !== 'done') {
+            if (!confirm('Map data has not completely loaded, so some portals may be missing. Do you want to continue?')) {
+                return
+            }
+        }
+
+        const visibleBounds = window.map.getBounds()
+        const visiblePortals: Record<string, L.Point> = {}
+
+        $.each(window.portals, (guid, portal) => {
+            const ll = portal.getLatLng()
+            if (visibleBounds.contains(ll)) {
+                visiblePortals[guid] = window.map.project(ll)
+            }
+        })
+
+        if (!Object.keys(visiblePortals).length) {
+            alert('Error: No portals visible in this view - nothing to snap points to!')
+            return
+        }
+
+        const findClosest = (latlng: L.LatLng): L.LatLng | undefined => {
+            const testPoint = window.map.project(latlng)
+            let minDistSquared = Infinity
+            let minGuid: string | undefined
+
+            for (const guid in visiblePortals) {
+                const diff = visiblePortals[guid].subtract(testPoint)
+                const distSquared = diff.x * diff.x + diff.y * diff.y
+                if (minDistSquared > distSquared) {
+                    minDistSquared = distSquared
+                    minGuid = guid
+                }
+            }
+
+            if (minGuid) {
+                const pll = window.portals[minGuid].getLatLng()
+                if (pll.lat !== latlng.lat || pll.lng !== latlng.lng) {
+                    return new L.LatLng(pll.lat, pll.lng)
+                }
+            }
+            return undefined
+        }
+
+        let changedCount = 0
+        let testCount = 0
+
+        drawnItems.eachLayer((layer) => {
+            const asAny = layer as any
+            if (asAny.getLatLng) {
+                const ll = (layer as L.Circle).getLatLng()
+                if (visibleBounds.contains(ll)) {
+                    testCount++
+                    const newll = findClosest(ll)
+                    if (newll) {
+                        (layer as L.Circle).setLatLng(newll)
+                        changedCount++
+                    }
+                }
+            } else if (asAny.getLatLngs) {
+                const polyline = layer as L.Polyline
+                const lls = polyline.getLatLngs() as L.LatLng[]
+                let layerChanged = false
+                lls.forEach((ll, index) => {
+                    if (visibleBounds.contains(ll)) {
+                        testCount++
+                        const newll = findClosest(ll)
+                        if (newll) {
+                            lls[index] = newll
+                            changedCount++
+                            layerChanged = true
+                        }
+                    }
+                })
+                if (layerChanged) {
+                    polyline.setLatLngs(lls)
+                }
+            }
+        })
+
+        if (changedCount) {
+            window.runHooks('pluginDrawTools', { event: 'layersSnappedToPortals' })
+        }
+
+        alert(`Tested ${testCount} points, and moved ${changedCount} onto portal coordinates`)
+        storage.save(drawnItems, drawOptions)
+    }
+}
