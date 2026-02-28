@@ -1,5 +1,4 @@
 import { Storage } from './Storage'
-import { DrawOptions } from '../DrawOptions'
 
 export class SnapHelper {
     readonly getSnapLatLng = (unsnappedLatLng: L.LatLng): L.LatLng => {
@@ -22,7 +21,7 @@ export class SnapHelper {
         return new L.LatLng(candidates[0][1].lat, candidates[0][1].lng)
     }
 
-    readonly snapToPortals = (drawnItems: L.FeatureGroup<L.ILayer>, storage: Storage, drawOptions: DrawOptions): void => {
+    readonly snapToPortals = (drawnItems: L.FeatureGroup<L.ILayer>, storage: Storage): void => {
         if (!(getDataZoomTileParameters() as any).hasPortals) {
             if (!confirm('Not all portals are visible on the map. Snap to portals may move valid points to the wrong place. Continue?')) {
                 return
@@ -115,6 +114,6 @@ export class SnapHelper {
         }
 
         alert(`Tested ${testCount} points, and moved ${changedCount} onto portal coordinates`)
-        storage.save(drawnItems, drawOptions)
+        storage.save(drawnItems)
     }
 }

@@ -73,11 +73,16 @@ backward-compat with existing stored data. `Storage.save()` now always writes `[
 normalises on load; `getDrawAsLines()` uses the outer ring; `OptionsDialog.optCopy()` iterates
 all rings (so hole boundaries also appear in the intel URL export).
 
-### 7. Unused `_drawOptions` Parameter in `Storage.save()`
+### 7. ✅ Unused `_drawOptions` Parameter in `Storage.save()`
 
 The parameter is prefixed `_` to suppress the lint warning, but it is never read. All
 callers pass `drawOptions`; either the parameter should be used (e.g. to pick up
 `markerOptions.icon` for marker color) or removed from the public API.
+
+Removed the parameter entirely. The cascade: `SnapHelper.snapToPortals()` only passed
+`drawOptions` so it could forward it to `save()`; it no longer takes `DrawOptions` either,
+which in turn drops the argument from the call site in `OptionsDialog`. All six `save()`
+call sites updated.
 
 ### 8. Add Named Constants for Magic Numbers
 

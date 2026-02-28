@@ -5,7 +5,7 @@ import { isCircle, isPolygon, isPolyline, isMarker, toPolygonRings } from './Lay
 export class Storage {
     keyStorage = 'plugin-draw-tools-layer'
 
-    readonly save = (drawnItems: L.FeatureGroup<L.ILayer>, _drawOptions: DrawOptions): void => {
+    readonly save = (drawnItems: L.FeatureGroup<L.ILayer>): void => {
         const data: DrawItem[] = []
 
         drawnItems.eachLayer((layer) => {

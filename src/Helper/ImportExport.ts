@@ -62,7 +62,7 @@ export class ImportExport {
             console.log(`DRAWTOOLS: ${merge ? '' : 'reset and '}pasted drawn items`)
         }
 
-        this.storage.save(this.drawnItems, this.drawOptions)
+        this.storage.save(this.drawnItems)
     }
 
     /**
@@ -75,6 +75,6 @@ export class ImportExport {
             this.drawnItems.clearLayers()
         }
         this.storage.import(rawData as DrawItem[], this.drawnItems, this.drawOptions)
-        this.storage.save(this.drawnItems, this.drawOptions)
+        this.storage.save(this.drawnItems)
     }
 }

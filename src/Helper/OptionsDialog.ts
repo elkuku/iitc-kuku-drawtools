@@ -33,7 +33,7 @@ export class OptionsDialog {
         $('<a>').text('Export Drawn Items').attr('tabindex', '0').on('click', () => { this.optExport() }).appendTo($setbox)
         $('<a>').text('Reset Drawn Items').attr('tabindex', '0').on('click', () => { this.optReset() }).appendTo($setbox)
         $('<a>').text('Snap to portals').attr('tabindex', '0').on('click', () => {
-            this.snapHelper.snapToPortals(this.drawnItems, this.storage, this.drawOptions)
+            this.snapHelper.snapToPortals(this.drawnItems, this.storage)
         }).appendTo($setbox)
 
         const $mergeLabel = $('<label id="MergeToggle">')

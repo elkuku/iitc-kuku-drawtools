@@ -99,7 +99,7 @@ class Main implements Plugin.Class {
         window.map.on('draw:created', (event: L.LeafletEvent) => {
             const layer = (event as any).layer as L.ILayer
             this.drawnItems.addLayer(layer)
-            this.storage.save(this.drawnItems, this.drawOptions)
+            this.storage.save(this.drawnItems)
 
             if (isMarker(layer)) {
                 registerMarkerForOMS(layer)
@@ -126,12 +126,12 @@ class Main implements Plugin.Class {
         })
 
         window.map.on('draw:deleted', () => {
-            this.storage.save(this.drawnItems, this.drawOptions)
+            this.storage.save(this.drawnItems)
             window.runHooks('pluginDrawTools', { event: 'layersDeleted' })
         })
 
         window.map.on('draw:edited', () => {
-            this.storage.save(this.drawnItems, this.drawOptions)
+            this.storage.save(this.drawnItems)
             window.runHooks('pluginDrawTools', { event: 'layersEdited' })
         })
 
