@@ -1,6 +1,11 @@
 // Declare external modules so TypeScript accepts side-effect imports.
 // leaflet-draw and spectrum-colorpicker are installed via yarn.
 // iitc-draw-* aliases are resolved to the IITC repo via webpack.config.cjs.
+declare module '*.hbs' {
+    const content: string;
+    export default content;
+}
+
 declare module 'leaflet-draw'
 declare module 'iitc-draw-snap'
 declare module 'iitc-draw-geodesic'
@@ -141,6 +146,13 @@ interface Window {
     isApp: boolean;
     app: { shareString(text: string): void };
     pnpoly(poly: L.Point[], point: L.Point): boolean;
+}
+
+// Augment the plugin namespace so window.plugin.HelperHandlebars is typed
+declare namespace plugin {
+    const HelperHandlebars: {
+        compile: (templateString: string) => Handlebars.TemplateDelegate;
+    } | undefined;
 }
 
 // Extend spectrum options with properties used by draw-tools

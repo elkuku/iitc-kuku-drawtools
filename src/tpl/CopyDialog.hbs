@@ -1,0 +1,18 @@
+<div>
+  <p style="margin:0 0 6px;">Normal export:</p>
+  <p style="margin:0 0 6px;"><a id="dt-select-norm">Select all</a> and press CTRL+C to copy it.</p>
+  <textarea id="copyNorm" readonly>{{normalExport}}</textarea>
+  <hr/>
+  <p style="margin:0 0 6px;">or export with polygons as lines (not filled):</p>
+  <p style="margin:0 0 6px;"><a id="dt-select-edf">Select all</a> and press CTRL+C to copy it.</p>
+  <textarea id="copyEDF" readonly>{{edfExport}}</textarea>
+  <hr/>
+  <p style="margin:0 0 6px;">or export as a link for the standard intel map (for non IITC users):</p>
+  <p style="margin:0 0 6px;"><a id="dt-select-stock">Select all</a> and press CTRL+C to copy it.</p>
+  <input type="text" size="49" id="dt-stock-url" value="{{stockUrl}}">
+  {{#if warnings}}
+  <ul>
+    {{#each warnings}}<li>{{this}}</li>{{/each}}
+  </ul>
+  {{/if}}
+</div>

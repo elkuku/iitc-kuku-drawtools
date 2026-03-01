@@ -10,6 +10,14 @@ module.exports = {
         // spectrum-colorpicker requires('jquery') at runtime; map it to the IITC global
         jquery: 'jQuery',
     },
+    module: {
+        rules: [
+            {
+                test: /\.hbs$/,
+                type: 'asset/source',
+            },
+        ],
+    },
     resolve: {
         alias: {
             'iitc-draw-snap': path.join(EXTERNAL, 'leaflet.draw-snap.js'),

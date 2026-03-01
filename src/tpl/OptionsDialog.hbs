@@ -1,0 +1,25 @@
+<div>
+  <div class="drawtoolsStyles">
+    <input type="color" name="drawColor" id="drawtools_color">
+  </div>
+  <div class="drawtoolsSetbox">
+    <a tabindex="0" id="dt-opt-copy">Copy Drawn Items</a>
+    <a tabindex="0" id="dt-opt-paste">Paste Drawn Items</a>
+    <a tabindex="0" id="dt-opt-import">Import Drawn Items</a>
+    <a tabindex="0" id="dt-opt-export">Export Drawn Items</a>
+    <a tabindex="0" id="dt-opt-reset">Reset Drawn Items</a>
+    <a tabindex="0" id="dt-opt-snap">Snap to portals</a>
+    <center>
+      <label id="MergeToggle">
+        <input type="checkbox" name="merge"{{#if mergeChecked}} checked{{/if}}>
+        Reset draws before paste or import
+      </label>
+    </center>
+    <center>
+      <label id="edfToggle">
+        <input type="checkbox" name="edf"{{#if edfChecked}} checked{{/if}}>
+        Fill the polygon(s)
+      </label>
+    </center>
+  </div>
+</div>

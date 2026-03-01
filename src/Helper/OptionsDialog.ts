@@ -5,6 +5,9 @@ import { DrawControl } from './DrawControl'
 import { SnapHelper } from './SnapHelper'
 import { EmptyDrawnFields } from './EmptyDrawnFields'
 import { ImportExport } from './ImportExport'
+import optionsDialogTpl from '../tpl/OptionsDialog.hbs'
+import copyDialogTpl from '../tpl/CopyDialog.hbs'
+import pasteDialogTpl from '../tpl/PasteDialog.hbs'
 
 export class OptionsDialog {
     private mergeMode = true
@@ -20,39 +23,24 @@ export class OptionsDialog {
     ) {}
 
     readonly show = (): void => {
-        const $container = $('<div>')
+        const template = window.plugin.HelperHandlebars!.compile(optionsDialogTpl)
+        const $container = $(template({
+            mergeChecked: !this.mergeMode,
+            edfChecked: !this.edf.status,
+        }))
 
-        const $styles = $('<div class="drawtoolsStyles">')
-        $('<input>').attr({ type: 'color', name: 'drawColor', id: 'drawtools_color' }).appendTo($styles)
-        $container.append($styles)
-
-        const $setbox = $('<div class="drawtoolsSetbox">')
-        $('<a>').text('Copy Drawn Items').attr('tabindex', '0').on('click', () => { this.optCopy() }).appendTo($setbox)
-        $('<a>').text('Paste Drawn Items').attr('tabindex', '0').on('click', () => { this.optPaste() }).appendTo($setbox)
-        $('<a>').text('Import Drawn Items').attr('tabindex', '0').on('click', () => { this.optImport() }).appendTo($setbox)
-        $('<a>').text('Export Drawn Items').attr('tabindex', '0').on('click', () => { this.optExport() }).appendTo($setbox)
-        $('<a>').text('Reset Drawn Items').attr('tabindex', '0').on('click', () => { this.optReset() }).appendTo($setbox)
-        $('<a>').text('Snap to portals').attr('tabindex', '0').on('click', () => {
+        $container.find('#dt-opt-copy').on('click', () => { this.optCopy() })
+        $container.find('#dt-opt-paste').on('click', () => { this.optPaste() })
+        $container.find('#dt-opt-import').on('click', () => { this.optImport() })
+        $container.find('#dt-opt-export').on('click', () => { this.optExport() })
+        $container.find('#dt-opt-reset').on('click', () => { this.optReset() })
+        $container.find('#dt-opt-snap').on('click', () => {
             this.snapHelper.snapToPortals(this.drawnItems, this.storage)
-        }).appendTo($setbox)
-
-        const $mergeLabel = $('<label id="MergeToggle">')
-        $('<input>').attr({ type: 'checkbox', name: 'merge' })
-            .prop('checked', !this.mergeMode)
-            .on('change', () => { this.mergeMode = !this.mergeMode })
-            .appendTo($mergeLabel)
-        $mergeLabel.append('Reset draws before paste or import')
-        $('<center>').append($mergeLabel).appendTo($setbox)
-
-        const $edfLabel = $('<label id="edfToggle">')
-        $('<input>').attr({ type: 'checkbox', name: 'edf' })
-            .prop('checked', !this.edf.status)
-            .on('change', () => { this.edf.statusToggle(this.drawnItems, this.storage, this.drawOptions) })
-            .appendTo($edfLabel)
-        $edfLabel.append('Fill the polygon(s)')
-        $('<center>').append($edfLabel).appendTo($setbox)
-
-        $container.append($setbox)
+        })
+        $container.find('input[name="merge"]').on('change', () => { this.mergeMode = !this.mergeMode })
+        $container.find('input[name="edf"]').on('change', () => {
+            this.edf.statusToggle(this.drawnItems, this.storage, this.drawOptions)
+        })
 
         dialog({
             html: $container,
@@ -135,29 +123,18 @@ export class OptionsDialog {
         if (stockWarnings.noMarker) stockWarnTexts.push('Warning: Markers cannot be exported to stock intel')
         if (stockWarnings.unknown) stockWarnTexts.push('Warning: UNKNOWN ITEM TYPE')
 
-        const $html = $('<div>')
-        $html.append(
-            $('<p style="margin:0 0 6px;">Normal export:</p>'),
-            $('<p style="margin:0 0 6px;">').append(
-                $('<a>').text('Select all').on('click', () => { $html.find('textarea#copyNorm').trigger('select') })
-            ).append(' and press CTRL+C to copy it.'),
-            $('<textarea id="copyNorm" readonly>').text(window.localStorage[this.storage.keyStorage] as string).on('click', function () { $(this).trigger('select') }),
-            $('<hr/>'),
-            $('<p style="margin:0 0 6px;">or export with polygons as lines (not filled):</p>'),
-            $('<p style="margin:0 0 6px;">').append(
-                $('<a>').text('Select all').on('click', () => { $html.find('textarea#copyEDF').trigger('select') })
-            ).append(' and press CTRL+C to copy it.'),
-            $('<textarea id="copyEDF" readonly>').text(this.storage.getDrawAsLines()).on('click', function () { $(this).trigger('select') }),
-            $('<hr/>'),
-            $('<p style="margin:0 0 6px;">or export as a link for the standard intel map (for non IITC users):</p>'),
-            $('<p style="margin:0 0 6px;">').append(
-                $('<a>').text('Select all').on('click', function () { $(this).next('input').trigger('select') })
-            ).append(' and press CTRL+C to copy it.'),
-            $('<input type="text" size="49">').val(stockUrl).on('click', function () { $(this).trigger('select') }),
-        )
-        if (stockWarnTexts.length > 0) {
-            $html.append($('<ul>').append(stockWarnTexts.map((text) => $('<li>').text(text))))
-        }
+        const template = window.plugin.HelperHandlebars!.compile(copyDialogTpl)
+        const $html = $(template({
+            normalExport: window.localStorage[this.storage.keyStorage] as string,
+            edfExport: this.storage.getDrawAsLines(),
+            stockUrl,
+            warnings: stockWarnTexts,
+        }))
+
+        $html.find('#dt-select-norm').on('click', () => { $html.find('textarea#copyNorm').trigger('select') })
+        $html.find('#dt-select-edf').on('click', () => { $html.find('textarea#copyEDF').trigger('select') })
+        $html.find('#dt-select-stock').on('click', () => { $html.find('#dt-stock-url').trigger('select') })
+        $html.find('textarea#copyNorm, textarea#copyEDF, #dt-stock-url').on('click', function () { $(this).trigger('select') })
 
         dialog({ html: $html, width: 600, dialogClass: 'ui-dialog-drawtoolsSet-copy', id: 'plugin-drawtools-export', title: 'Draw Tools Export' })
     }
@@ -168,10 +145,8 @@ export class OptionsDialog {
     }
 
     readonly optPaste = (): void => {
-        const $html = $('<div>').append(
-            $('<p>').text('Press CTRL+V to paste (draw-tools data or stock intel URL).'),
-            $('<input>').attr({ id: 'drawtoolsimport', type: 'text', style: 'width:100%' }),
-        )
+        const template = window.plugin.HelperHandlebars!.compile(pasteDialogTpl)
+        const $html = $(template({}))
 
         dialog({
             title: 'Import Draw-Tools data',
