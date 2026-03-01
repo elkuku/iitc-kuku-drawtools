@@ -14,6 +14,36 @@
     margin: 10px 0;
 }
 
+.dt-items-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.dt-item-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255, 206, 0, 0.15);
+}
+
+.dt-item-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.dt-item-type {
+    min-width: 56px;
+}
+
+.dt-item-detail {
+    color: #ccc;
+    font-size: 0.85em;
+}
+
 .ui-dialog-drawtoolsSet-copy textarea {
     width: 96%;
     height: 150px;

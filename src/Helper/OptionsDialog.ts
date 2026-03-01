@@ -22,11 +22,52 @@ export class OptionsDialog {
         private readonly importExport: ImportExport,
     ) {}
 
+    private readonly buildItemsList = (): { items: { type: string; detail: string; color?: string }[]; layers: L.ILayer[] } => {
+        const items: { type: string; detail: string; color?: string }[] = []
+        const layers: L.ILayer[] = []
+        this.drawnItems.eachLayer((layer) => {
+            layers.push(layer)
+            if (isCircle(layer)) {
+                const ll = layer.getLatLng()
+                const r = Math.round(layer.getRadius())
+                items.push({
+                    type: 'circle',
+                    detail: `${ll.lat.toFixed(5)}, ${ll.lng.toFixed(5)}  r=${r}m`,
+                    color: (layer as any).options?.color as string | undefined,
+                })
+            } else if (isPolygon(layer)) {
+                const latLngs = layer.getLatLngs() as L.LatLng[]
+                items.push({
+                    type: 'polygon',
+                    detail: `${latLngs.length} points`,
+                    color: (layer as any).options?.color as string | undefined,
+                })
+            } else if (isPolyline(layer)) {
+                const latLngs = layer.getLatLngs() as L.LatLng[]
+                items.push({
+                    type: 'polyline',
+                    detail: `${latLngs.length} points`,
+                    color: (layer as any).options?.color as string | undefined,
+                })
+            } else if (isMarker(layer)) {
+                const ll = layer.getLatLng()
+                items.push({
+                    type: 'marker',
+                    detail: `${ll.lat.toFixed(5)}, ${ll.lng.toFixed(5)}`,
+                    color: (layer as any).options?.icon?.options?.color as string | undefined,
+                })
+            }
+        })
+        return { items, layers }
+    }
+
     readonly show = (): void => {
         const template = window.plugin.HelperHandlebars!.compile(optionsDialogTpl)
+        const { items, layers } = this.buildItemsList()
         const $container = $(template({
             mergeChecked: !this.mergeMode,
             edfChecked: !this.edf.status,
+            items,
         }))
 
         $container.find('#dt-opt-copy').on('click', () => { this.optCopy() })
@@ -40,6 +81,15 @@ export class OptionsDialog {
         $container.find('input[name="merge"]').on('change', () => { this.mergeMode = !this.mergeMode })
         $container.find('input[name="edf"]').on('change', () => {
             this.edf.statusToggle(this.drawnItems, this.storage, this.drawOptions)
+        })
+        $container.find('.dt-item-zoom').on('click', function () {
+            const idx = parseInt($(this).closest('.dt-item-row').data('index') as string, 10)
+            const layer = layers[idx]
+            if (isMarker(layer)) {
+                window.map.setView(layer.getLatLng(), Math.max(window.map.getZoom(), 16))
+            } else {
+                window.map.fitBounds((layer as any).getBounds() as L.LatLngBounds)
+            }
         })
 
         dialog({

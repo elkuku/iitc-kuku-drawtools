@@ -1,5 +1,6 @@
 <div id="dt-tabs">
     <ul>
+        <li><a href="#dt-tab-items">Items</a></li>
         <li><a href="#dt-tab-settings">Settings</a></li>
         <li><a href="#dt-tab-exportimport">Export/Import</a></li>
         <li><a href="#dt-tab-actions">Actions</a></li>
@@ -23,10 +24,27 @@
         <fieldset>
             <legend>As File</legend>
             <div class="drawtoolsSetbox">
-                <a tabindex="0" id="dt-opt-import">Import Drawn Items</a>
                 <a tabindex="0" id="dt-opt-export">Export Drawn Items</a>
+                <a tabindex="0" id="dt-opt-import">Import Drawn Items</a>
             </div>
         </fieldset>
+    </div>
+
+    <div id="dt-tab-items">
+        {{#if items.length}}
+        <div class="dt-items-list">
+            {{#each items}}
+            <div class="dt-item-row" data-index="{{@index}}">
+                {{#if color}}<span class="dt-item-color" style="background:{{color}}"></span>{{/if}}
+                <span class="dt-item-type"><a class="dt-item-zoom" tabindex="0">{{type}}</a></span>
+                <span class="dt-item-detail">{{detail}}</span>
+
+            </div>
+            {{/each}}
+        </div>
+        {{else}}
+        <p style="color:#ccc;padding:8px">No drawn items.</p>
+        {{/if}}
     </div>
 
     <div id="dt-tab-settings">
