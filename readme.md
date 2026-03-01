@@ -13,7 +13,9 @@ The UI has been redesigned:
 ## After
 
 <img width="320" height="295" alt="Image" src="https://github.com/user-attachments/assets/b7a58900-8a7c-47c9-8f3f-d35b08d6ad62" />
+<br>
 <img width="320" height="396" alt="Image" src="https://github.com/user-attachments/assets/77243768-2554-4bb8-b358-b424b06acd5b" />
+<br>
 <img width="320" height="263" alt="Image" src="https://github.com/user-attachments/assets/8de2a31d-ed05-40fa-ab3b-8369fd475166" />
 
 ### New feature: List of drawn items
