@@ -27,10 +27,14 @@ const config = tseslint.config(
     {
         ignores: [
             "eslint.config.js",
+            ".github/",
             "config/",
+            "coverage/",
             "dist/",
+            "external/",
             "types/",
             "vitest.config.ts",
+            "webpack.config.cjs",
             "src/**/*.spec.ts",
             "src/TestSetup.ts",
         ]
