@@ -50,6 +50,16 @@
 - Types: `types/DrawTools.d.ts` (custom augmentations), `types/Types.ts` (WindowPlugin)
 - Config: `plugin.json`, `tsconfig.json`
 
+## Handlebars Templates
+- `src/tpl/` contains `.hbs` files imported as raw text strings (webpack `asset/source`)
+- `webpack.config.cjs` has `{ test: /\.hbs$/, type: 'asset/source' }` rule
+- `types/DrawTools.d.ts` has `declare module '*.hbs'` for TS imports
+- Templates compiled at runtime via `window.plugin.HelperHandlebars!.compile(tplString)`
+- `window.plugin.HelperHandlebars` is typed via `declare namespace plugin { const HelperHandlebars: ... }` in `DrawTools.d.ts`
+  - `window.plugin` is `typeof plugin` (namespace), NOT `WindowPlugin` — augment the namespace directly
+  - The `interface WindowPlugin { ... }` augmentations in `DrawTools.d.ts` do NOT affect `window.plugin` typing
+  - For 3rd-party plugin access, either augment `namespace plugin` (typed) or use `window.plugin as any` (like `MpeIntegration.ts`)
+
 ## Architecture
 Refactored from monolithic `draw-tools.js` into these classes:
 - `DrawOptions` — color/shape options state
