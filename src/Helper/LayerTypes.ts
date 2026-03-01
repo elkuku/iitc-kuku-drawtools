@@ -20,16 +20,3 @@ export const isPolyline = (layer: L.ILayer): layer is L.Polyline =>
 export const isMarker = (layer: L.ILayer): layer is L.Marker =>
     layer instanceof L.Marker
 
-/**
- * Normalise a polygon's getLatLngs() result to an array of rings.
- * Simple polygons may return a flat LatLng[] while polygons with holes
- * return LatLng[][]. This function always returns LatLng[][].
- */
-export const toPolygonRings = (
-    latLngs: { lat: number; lng: number }[] | { lat: number; lng: number }[][],
-): { lat: number; lng: number }[][] => {
-    if (latLngs.length === 0) return []
-    return Array.isArray(latLngs[0])
-        ? latLngs as { lat: number; lng: number }[][]
-        : [latLngs as { lat: number; lng: number }[]]
-}

@@ -29,6 +29,17 @@ export const loadExternals = (): void => {
     // eslint-disable-next-line no-underscore-dangle
     polylineProto._onTouch = L.Util.falseFn
 
+    // The geodesic addHooks override (leaflet.draw-geodesic.js) only registers
+    // 'touchstart' for _onTouch, never 'click'. The original removeHooks calls
+    // .off('click', this._onTouch) → spurious Leaflet "listener not found" warning.
+    // Pre-register the click listener in removeHooks so off() can find and remove it.
+    const origPolylineRemoveHooks = polylineProto.removeHooks as (this: unknown) => void
+    polylineProto.removeHooks = function (this: any) {
+        // eslint-disable-next-line no-underscore-dangle
+        if (this._map) this._map.on('click', this._onTouch, this)
+        origPolylineRemoveHooks.call(this)
+    }
+
     // Workaround for https://github.com/Leaflet/Leaflet.draw/issues/923
     // addHandler and TouchExtend are Leaflet.draw extensions not in @types/leaflet 0.7.x
     const mapAny = window.map as any
