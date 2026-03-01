@@ -109,8 +109,17 @@ now-unused `_toolbars` and `_container` members from the `LeafletDrawControl` in
 
 ## Low Priority
 
-### 10. No Test Coverage
+### 10. ✅ No Test Coverage
 
-No test files or framework are present. The codebase is hard to test due to globals
-(`window.map`, `window.portals`, `localStorage`). Improvements would require dependency
-injection and abstracting the storage layer.
+Added [Vitest](https://vitest.dev/) with 62 tests across four spec files:
+
+| File | Tests |
+|---|---|
+| `src/Helper/LayerTypes.spec.ts` | 18 — type guards and `toPolygonRings()` |
+| `src/DrawOptions.spec.ts` | 19 — init, updateColor, setFillOpacity, getMarkerIcon |
+| `src/Helper/Storage.spec.ts` | 10 — isEmpty, getDrawAsLines |
+| `src/Helper/ImportExport.spec.ts` | 15 — promptImport (intel URL + JSON), importData |
+
+Globals (`L`, `dialog`, `runHooks`, `localStorage`) are stubbed in `src/TestSetup.ts`.
+Also fixed `Storage.ts` and `ImportExport.ts` to use the standard `localStorage.getItem/setItem`
+API instead of bracket notation, and excluded spec files from `tsconfig.json`.

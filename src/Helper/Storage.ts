@@ -25,13 +25,13 @@ export class Storage {
             }
         })
 
-        window.localStorage[this.keyStorage] = JSON.stringify(data)
+        window.localStorage.setItem(this.keyStorage, JSON.stringify(data))
         console.log('draw-tools: saved to localStorage')
     }
 
     readonly load = (drawnItems: L.FeatureGroup<L.ILayer>, drawOptions: DrawOptions): void => {
         try {
-            const dataStr = window.localStorage[this.keyStorage] as string | undefined
+            const dataStr = window.localStorage.getItem(this.keyStorage) ?? undefined
             if (dataStr === undefined) return
             const data = JSON.parse(dataStr) as DrawItem[]
             this.import(data, drawnItems, drawOptions)
@@ -76,7 +76,7 @@ export class Storage {
     }
 
     readonly isEmpty = (): boolean => {
-        const data = window.localStorage[this.keyStorage] as string | undefined
+        const data = window.localStorage.getItem(this.keyStorage)
         if (!data || data.length <= 2) {
             dialog({
                 html: 'Error! The storage is empty or does not exist. Draw something before trying to copy/export.',
@@ -90,7 +90,7 @@ export class Storage {
     }
 
     readonly getDrawAsLines = (): string => {
-        const rawDraw = JSON.parse(window.localStorage[this.keyStorage] as string) as DrawItem[]
+        const rawDraw = JSON.parse(window.localStorage.getItem(this.keyStorage) ?? '[]') as DrawItem[]
         const draw: DrawItem[] = []
 
         for (const element of rawDraw) {

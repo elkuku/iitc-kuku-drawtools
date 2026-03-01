@@ -41,7 +41,7 @@ export class ImportExport {
         } else {
             let mergedAction = promptAction
             if (merge) {
-                const existing = window.localStorage[this.storage.keyStorage] as string | undefined
+                const existing = window.localStorage.getItem(this.storage.keyStorage)
                 if (existing && existing.length > 4) {
                     mergedAction = existing.slice(0, -1) + ',' + promptAction.slice(1)
                 }

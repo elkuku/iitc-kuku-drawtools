@@ -29,7 +29,10 @@ const config = tseslint.config(
             "eslint.config.js",
             "config/",
             "dist/",
-            "types/"
+            "types/",
+            "vitest.config.ts",
+            "src/**/*.spec.ts",
+            "src/TestSetup.ts",
         ]
     },
     {
