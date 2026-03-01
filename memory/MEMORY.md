@@ -60,6 +60,14 @@
   - The `interface WindowPlugin { ... }` augmentations in `DrawTools.d.ts` do NOT affect `window.plugin` typing
   - For 3rd-party plugin access, either augment `namespace plugin` (typed) or use `window.plugin as any` (like `MpeIntegration.ts`)
 
+### Current templates
+| File | Used by |
+|------|---------|
+| `OptionsDialog.hbs` | Dialog shell; four jQuery UI tabs (Items, Settings, Export/Import, Actions) |
+| `ItemRow.hbs` | Single item row for the Items tab (rendered in JS loop) |
+| `CopyDialog.hbs` | Export/copy dialog |
+| `PasteDialog.hbs` | Import/paste dialog |
+
 ## Architecture
 Refactored from monolithic `draw-tools.js` into these classes:
 - `DrawOptions` — color/shape options state
@@ -72,3 +80,59 @@ Refactored from monolithic `draw-tools.js` into these classes:
 - `LocationFilter` — polygon-based portal filter
 - `MpeIntegration` — Multi Projects Extension support
 - `Externals` — loads leaflet.draw + spectrum at runtime
+
+## OptionsDialog — Items tab live-refresh pattern
+`#dt-tab-items` is an empty div in the template; all rendering is done by `renderItems()` in JS.
+
+```typescript
+// Compiled once in show():
+const itemRowTemplate = window.plugin.HelperHandlebars!.compile(itemRowTpl)
+let currentLayers: L.ILayer[] = []
+
+// Single delegated handler (bound once):
+$container.on('click', '.dt-item-zoom', (event) => {
+    const index = parseInt($(event.currentTarget).closest('.dt-item-row').data('index') as string, 10)
+    // zoom via window.map.setView (marker) or window.map.fitBounds (others)
+})
+
+// renderItems() rebuilds the tab and updates currentLayers:
+const renderItems = (): void => { ... }
+
+renderItems()                                    // initial render
+this.refreshItemsTab = renderItems               // for optReset
+window.map.on('draw:created', renderItems)       // live updates
+window.map.on('draw:edited', renderItems)
+window.map.on('draw:deleted', renderItems)
+
+dialog({ ..., closeCallback: () => {
+    window.map.off(...)
+    this.refreshItemsTab = undefined
+}})
+```
+
+`optReset()` calls `this.refreshItemsTab?.()` to cover the clear-all case.
+
+## Layer type guard ordering
+Always check `isPolygon` **before** `isPolyline` — Polygon extends Polyline in Leaflet.
+
+## Zoom-to-layer pattern
+```typescript
+if (isMarker(layer)) {
+    window.map.setView(layer.getLatLng(), Math.max(window.map.getZoom(), 16))
+} else {
+    window.map.fitBounds((layer as any).getBounds() as L.LatLngBounds)
+}
+```
+
+## dialog() closeCallback
+IITC's `dialog()` wrapper accepts a non-standard `closeCallback` option. Use it to clean up `window.map` event listeners when the dialog closes.
+
+## Draw events (Main.ts)
+- `draw:created` → fires `pluginDrawTools { event: 'layerCreated' }`
+- `draw:edited` → fires `pluginDrawTools { event: 'layersEdited' }`
+- `draw:deleted` → fires `pluginDrawTools { event: 'layersDeleted' }`
+- `optReset` → fires `pluginDrawTools { event: 'clear' }`
+
+## Known pre-existing ESLint warnings (non-blocking)
+- `@typescript-eslint/no-unsafe-call` on Handlebars template invocations
+- `@typescript-eslint/no-unnecessary-type-assertion` on `(layer as any).options?.color as string`
