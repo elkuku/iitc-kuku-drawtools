@@ -30,22 +30,7 @@
         </fieldset>
     </div>
 
-    <div id="dt-tab-items">
-        {{#if items.length}}
-        <div class="dt-items-list">
-            {{#each items}}
-            <div class="dt-item-row" data-index="{{@index}}">
-                {{#if color}}<span class="dt-item-color" style="background:{{color}}"></span>{{/if}}
-                <span class="dt-item-type"><a class="dt-item-zoom" tabindex="0">{{type}}</a></span>
-                <span class="dt-item-detail">{{detail}}</span>
-
-            </div>
-            {{/each}}
-        </div>
-        {{else}}
-        <p style="color:#ccc;padding:8px">No drawn items.</p>
-        {{/if}}
-    </div>
+    <div id="dt-tab-items"></div>
 
     <div id="dt-tab-settings">
         <div class="drawtoolsStyles">

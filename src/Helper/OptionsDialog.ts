@@ -6,11 +6,13 @@ import { SnapHelper } from './SnapHelper'
 import { EmptyDrawnFields } from './EmptyDrawnFields'
 import { ImportExport } from './ImportExport'
 import optionsDialogTpl from '../tpl/OptionsDialog.hbs'
+import itemRowTpl from '../tpl/ItemRow.hbs'
 import copyDialogTpl from '../tpl/CopyDialog.hbs'
 import pasteDialogTpl from '../tpl/PasteDialog.hbs'
 
 export class OptionsDialog {
     private mergeMode = true
+    private refreshItemsTab: (() => void) | undefined
 
     constructor(
         private readonly drawnItems: L.FeatureGroup<L.ILayer>,
@@ -63,11 +65,9 @@ export class OptionsDialog {
 
     readonly show = (): void => {
         const template = window.plugin.HelperHandlebars!.compile(optionsDialogTpl)
-        const { items, layers } = this.buildItemsList()
         const $container = $(template({
             mergeChecked: !this.mergeMode,
             edfChecked: !this.edf.status,
-            items,
         }))
 
         $container.find('#dt-opt-copy').on('click', () => { this.optCopy() })
@@ -82,9 +82,13 @@ export class OptionsDialog {
         $container.find('input[name="edf"]').on('change', () => {
             this.edf.statusToggle(this.drawnItems, this.storage, this.drawOptions)
         })
-        $container.find('.dt-item-zoom').on('click', function () {
-            const idx = parseInt($(this).closest('.dt-item-row').data('index') as string, 10)
-            const layer = layers[idx]
+
+        const itemRowTemplate = window.plugin.HelperHandlebars!.compile(itemRowTpl)
+        let currentLayers: L.ILayer[] = []
+
+        $container.on('click', '.dt-item-zoom', (event) => {
+            const index = parseInt($(event.currentTarget).closest('.dt-item-row').data('index') as string, 10)
+            const layer = currentLayers[index]
             if (isMarker(layer)) {
                 window.map.setView(layer.getLatLng(), Math.max(window.map.getZoom(), 16))
             } else {
@@ -92,11 +96,39 @@ export class OptionsDialog {
             }
         })
 
+        const renderItems = (): void => {
+            const { items, layers } = this.buildItemsList()
+            currentLayers = layers
+            const $tab = $container.find('#dt-tab-items')
+            $tab.empty()
+            if (items.length === 0) {
+                $tab.append($('<p>').css({ color: '#ccc', padding: '8px' }).text('No drawn items.'))
+                return
+            }
+            const $list = $('<div>').addClass('dt-items-list')
+            items.forEach((item, index) => {
+                $list.append($(itemRowTemplate({ ...item, index })))
+            })
+            $tab.append($list)
+        }
+
+        renderItems()
+        this.refreshItemsTab = renderItems
+        window.map.on('draw:created', renderItems)
+        window.map.on('draw:edited', renderItems)
+        window.map.on('draw:deleted', renderItems)
+
         dialog({
             html: $container,
             id: 'plugin-drawtools-options',
             dialogClass: 'ui-dialog-drawtoolsSet',
             title: 'Draw Tools',
+            closeCallback: () => {
+                window.map.off('draw:created', renderItems)
+                window.map.off('draw:edited', renderItems)
+                window.map.off('draw:deleted', renderItems)
+                this.refreshItemsTab = undefined
+            },
         })
 
         $container.tabs()
@@ -240,6 +272,7 @@ export class OptionsDialog {
             console.log('DRAWTOOLS: reset all drawn items')
             this.optAlert('Reset Successful. ')
             window.runHooks('pluginDrawTools', { event: 'clear' })
+            this.refreshItemsTab?.()
         }
     }
 }
