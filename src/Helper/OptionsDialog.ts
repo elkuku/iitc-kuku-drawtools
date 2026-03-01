@@ -46,7 +46,7 @@ export class OptionsDialog {
             html: $container,
             id: 'plugin-drawtools-options',
             dialogClass: 'ui-dialog-drawtoolsSet',
-            title: 'Draw Tools Options',
+            title: 'Draw Tools',
         })
 
         $container.tabs()
