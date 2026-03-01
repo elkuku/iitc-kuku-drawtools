@@ -1,25 +1,47 @@
-<div>
-  <div class="drawtoolsStyles">
-    <input type="color" name="drawColor" id="drawtools_color">
-  </div>
-  <div class="drawtoolsSetbox">
-    <a tabindex="0" id="dt-opt-copy">Copy Drawn Items</a>
-    <a tabindex="0" id="dt-opt-paste">Paste Drawn Items</a>
-    <a tabindex="0" id="dt-opt-import">Import Drawn Items</a>
-    <a tabindex="0" id="dt-opt-export">Export Drawn Items</a>
-    <a tabindex="0" id="dt-opt-reset">Reset Drawn Items</a>
-    <a tabindex="0" id="dt-opt-snap">Snap to portals</a>
-    <center>
-      <label id="MergeToggle">
-        <input type="checkbox" name="merge"{{#if mergeChecked}} checked{{/if}}>
-        Reset draws before paste or import
-      </label>
-    </center>
-    <center>
-      <label id="edfToggle">
-        <input type="checkbox" name="edf"{{#if edfChecked}} checked{{/if}}>
-        Fill the polygon(s)
-      </label>
-    </center>
-  </div>
+<div id="dt-tabs">
+    <ul>
+        <li><a href="#dt-tab-settings">Settings</a></li>
+        <li><a href="#dt-tab-exportimport">Export/Import</a></li>
+        <li><a href="#dt-tab-actions">Actions</a></li>
+    </ul>
+
+    <div id="dt-tab-actions">
+        <div class="drawtoolsSetbox">
+            <a tabindex="0" id="dt-opt-snap">Snap to portals</a>
+            <a tabindex="0" id="dt-opt-reset">Reset Drawn Items</a>
+        </div>
+    </div>
+
+    <div id="dt-tab-exportimport">
+        <fieldset>
+            <legend>As Text</legend>
+            <div class="drawtoolsSetbox">
+                <a tabindex="0" id="dt-opt-copy">Copy Drawn Items</a>
+                <a tabindex="0" id="dt-opt-paste">Paste Drawn Items</a>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>As File</legend>
+            <div class="drawtoolsSetbox">
+                <a tabindex="0" id="dt-opt-import">Import Drawn Items</a>
+                <a tabindex="0" id="dt-opt-export">Export Drawn Items</a>
+            </div>
+        </fieldset>
+    </div>
+
+    <div id="dt-tab-settings">
+        <div class="drawtoolsStyles">
+            Draw Color
+            <input type="color" name="drawColor" id="drawtools_color">
+        </div>
+        <label id="MergeToggle">
+            <input type="checkbox" name="merge"{{#if mergeChecked}} checked{{/if}}>
+            Reset draws before paste or import
+        </label>
+        <br>
+        <label id="edfToggle">
+            <input type="checkbox" name="edf"{{#if edfChecked}} checked{{/if}}>
+            Fill the polygon(s)
+        </label>
+    </div>
 </div>

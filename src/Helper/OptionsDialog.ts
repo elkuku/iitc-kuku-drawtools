@@ -49,6 +49,8 @@ export class OptionsDialog {
             title: 'Draw Tools Options',
         })
 
+        $container.tabs()
+
         // spectrum is loaded at runtime via loadExternals; cast options to pick up non-standard fields
         $('#drawtools_color').spectrum({
             flat: false,

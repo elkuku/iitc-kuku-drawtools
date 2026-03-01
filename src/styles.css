@@ -5,8 +5,13 @@
     padding: 3px 0;
     margin: 10px auto;
     width: 80%;
-    text-align: center;
     background: rgba(8, 48, 78, .9);
+}
+
+.drawtoolsStyles {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0;
 }
 
 .ui-dialog-drawtoolsSet-copy textarea {
