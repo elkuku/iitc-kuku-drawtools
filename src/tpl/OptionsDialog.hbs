@@ -1,17 +1,9 @@
 <div id="dt-tabs">
     <ul>
         <li><a href="#dt-tab-items">Items</a></li>
-        <li><a href="#dt-tab-settings">Settings</a></li>
         <li><a href="#dt-tab-exportimport">Export/Import</a></li>
-        <li><a href="#dt-tab-actions">Actions</a></li>
+        <li><a href="#dt-tab-settings">Settings</a></li>
     </ul>
-
-    <div id="dt-tab-actions">
-        <div class="drawtoolsSetbox">
-            <a tabindex="0" id="dt-opt-snap">Snap to portals</a>
-            <a tabindex="0" id="dt-opt-reset">Reset Drawn Items</a>
-        </div>
-    </div>
 
     <div id="dt-tab-exportimport">
         <fieldset>
@@ -33,17 +25,27 @@
     <div id="dt-tab-items"></div>
 
     <div id="dt-tab-settings">
-        <div class="drawtoolsStyles">
-            Draw Color
-            <input type="color" name="drawColor" id="drawtools_color">
-        </div>
-        <label id="MergeToggle">
-            <input type="checkbox" name="merge"{{#if mergeChecked}} checked{{/if}}>
-            Reset draws before paste or import
-        </label>
-        <label id="edfToggle">
-            <input type="checkbox" name="edf"{{#if edfChecked}} checked{{/if}}>
-            Fill the polygon(s)
-        </label>
+        <fieldset>
+            <legend>Settings</legend>
+            <div class="drawtoolsStyles">
+                Draw Color<!-- using a label here would trigger the native browser color selector -->
+                <input type="color" name="drawColor" id="drawtools_color">
+            </div>
+            <label id="MergeToggle">
+                <input type="checkbox" name="merge"{{#if mergeChecked}} checked{{/if}}>
+                Reset draws before paste or import
+            </label>
+            <label id="edfToggle">
+                <input type="checkbox" name="edf"{{#if edfChecked}} checked{{/if}}>
+                Fill the polygon(s)
+            </label>
+        </fieldset>
+        <fieldset>
+            <legend>Actions</legend>
+            <div class="drawtoolsSetbox">
+                <a tabindex="0" id="dt-opt-snap">Snap to portals</a>
+                <a tabindex="0" id="dt-opt-reset">Clear Drawn Items</a>
+            </div>
+        </fieldset>
     </div>
 </div>

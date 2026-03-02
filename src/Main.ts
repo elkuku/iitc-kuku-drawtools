@@ -153,3 +153,10 @@ class Main implements Plugin.Class {
 }
 
 Plugin.Register(new Main, PLUGIN_NAME)
+
+// The original draw-tools sets setup.priority = 'high' so it runs before dependent plugins
+// (e.g. cross-links checks window.plugin.drawTools !== undefined at setup time).
+// iitcpluginkit's Register() doesn't expose priority, so we set it on the last bootPlugin entry.
+if (window.bootPlugins?.length) {
+    (window.bootPlugins.at(-1) as any).priority = 'high'
+}
